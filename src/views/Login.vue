@@ -1,6 +1,6 @@
 <script lang="ts">
 import * as userApi from '../api/user';
-import type { User } from '../types/Users.types.js';
+import type { User } from '@/types/Users.types';
 import '@fortawesome/fontawesome-free/css/all.min.css'
 
 export default {

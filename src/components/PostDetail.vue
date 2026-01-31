@@ -4,6 +4,7 @@ import * as CommentApi from '../api/comments';
 import type { Comment } from '@/types/Comments.type';
 import CommentsTable from './CommentsTable.vue';
 import AddCommentFrom from './AddCommentFrom.vue';
+import Loader from './Loader.vue';
 
 export default {
   name: 'PostDetail',
@@ -11,6 +12,16 @@ export default {
   components: {
     CommentsTable,
     AddCommentFrom,
+    Loader,
+  },
+
+  watch: {
+    'selectedPost.id': {
+      immediate: true,
+      handler() {
+        this.fetchPosts();
+      }
+    }
   },
 
   props: {
@@ -25,6 +36,7 @@ export default {
       comments: [] as Comment[],
       errorMessage: '',
       isAddingComment: false,
+      isLoading: false,
     }
   },
 
@@ -40,33 +52,42 @@ export default {
     handleCommentCreated(payload: { name: string; email: string; body: string }) {
       const { name, email, body } = payload;
 
+      this.isLoading = true;
+
       CommentApi.createComment(this.selectedPost.id, name, email, body)
         .then(() => {
           this.fetchPosts();
           this.isAddingComment = false;
+          this.isLoading = false;
         })
         .catch((error) => {
           this.errorMessage = error.message;
         });
     },
 
-    handleDeleteComment(commentId: number) {
-      if (!commentId) {
-        return;
-      }
+    async handleDeleteComment(commentId: number) {
+      if (!commentId) return;
 
-      CommentApi.deleteComment(commentId)
-        .then(() => {
-          this.fetchPosts()
-        })
-        .catch((error) => {
-          this.errorMessage = error.message
-        })
+      const prevComments = [...this.comments];
+
+      this.comments = this.comments.filter(
+        comment => comment.id !== commentId
+      );
+
+      try {
+        await CommentApi.deleteComment(commentId);
+      } catch {
+        this.comments = prevComments;
+        this.errorMessage = 'Failed to delete comment';
+      }
     },
 
+
     async fetchPosts() {
+      this.isLoading = true
       try {
         this.comments = await CommentApi.getAllCommentsByPostId(+this.selectedPost.id)
+        this.isLoading = false
       } catch {
         this.errorMessage = 'Failed to load posts'
       }
@@ -76,48 +97,48 @@ export default {
 </script>
 
 <template>
-  <div class="post-detail">
-    <div class="post-detail-main-info">
-      <div class="post-detail-header">
-        <h2 class="post-detail-title">#{{ selectedPost.id }}: {{ selectedPost.title }}</h2>
+  <div class="box post-detail post-detail-main-info">
+    <div class="post-detail-header level mb-4">
+      <h2 class="post-detail-title title is-4">
+        #{{ selectedPost.id }}: {{ selectedPost.title }}
+      </h2>
 
-        <div class="button-wrapper">
-          <button @click="$emit('edit')" class="btn edit-btn">
-            <i class="fas fa-edit"></i>
-          </button>
+      <div class="button-wrapper level-right buttons">
+        <button class="btn edit-btn button is-small is-info is-light" @click="$emit('edit')">
+          <span class="icon"><i class="fas fa-edit"></i></span>
+        </button>
 
-          <button @click="handleDelete" class="btn delete-btn">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        </div>
-      </div>
-
-      <div class="post-detail-content">
-        <p>{{ selectedPost.body }}</p>
+        <button class="btn delete-btn button is-small is-danger is-light" @click="handleDelete">
+          <span class="icon"><i class="fas fa-trash"></i></span>
+        </button>
       </div>
     </div>
 
-    <div class="comments-wrapper">
-      <!-- 1. Немає коментарів і НЕ додаємо -->
-      <p v-if="comments.length === 0 && !isAddingComment" class="comments-wrapper-title">
+    <div class="content mb-5 post-detail-content">
+      <p>{{ selectedPost.body }}</p>
+    </div>
+
+    <Loader v-if="isLoading" />
+
+    <div class="comments-wrapper block" v-else>
+      <p v-if="comments.length === 0 && !isAddingComment" class="comments-wrapper-title title is-5 has-text-grey">
         No comments yet
       </p>
 
-      <!-- 2. Додаємо коментар -->
       <AddCommentFrom v-else-if="isAddingComment" @close="isAddingComment = false"
         @comment-created="handleCommentCreated" />
 
-
-      <!-- 3. Є коментарі → таблиця -->
       <CommentsTable v-else :comments="comments" @deleted="handleDeleteComment" />
     </div>
 
-    <button v-if="isAddingComment === false" class="button button--primary"
-      v-on:click="isAddingComment = !isAddingComment">
+    <button v-if="!isAddingComment && !isLoading" class="button button--primary is-fullwidth"
+      :class="{ 'is-loading': isLoading }" @click="isAddingComment = true">
       Write Comment
     </button>
   </div>
+
 </template>
+
 
 
 <style>
@@ -144,6 +165,10 @@ export default {
   color: #363636;
   font-weight: 600;
   line-height: 1.125;
+}
+
+.post-detail-content {
+  margin-bottom: 1.5rem;
 }
 
 .button-wrapper {
@@ -187,6 +212,10 @@ export default {
   font-size: 1rem;
 
   padding: calc(.5em - 1px) 1em;
+}
+
+.button.is-loading {
+  pointer-events: none;
 }
 
 .button--primary:hover {

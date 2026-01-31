@@ -18,18 +18,24 @@ export default {
 </script>
 
 <template>
-  <div v-for="comment in comments" :key="comment.id">
-    <article class="comment">
-      <div class="message-header">
-        <a href="mailto:{{ comment.email }}" class="message-header-name">{{ comment.name }}</a>
-        <button type="button" class="delete is-small" aria-label="delete" v-on:click="handleDelete(comment.id)">
-          <span aria-hidden="true">×</span>
-        </button>
-      </div>
-      <div class="message-body">{{ comment.body }}</div>
-    </article>
-  </div>
+  <article v-for="comment in comments" :key="comment.id" class="message comment">
+    <div class="message-header custom-header">
+      <a :href="`mailto:${comment.email}`" class="message-header-name">
+        {{ comment.name }}
+      </a>
+
+      <button class="delete is-small custom-delete" aria-label="delete" @click="handleDelete(comment.id)">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+
+    <div class="message-body custom-body">
+      {{ comment.body }}
+    </div>
+  </article>
 </template>
+
+
 
 <style scoped>
 .comment {

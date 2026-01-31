@@ -64,47 +64,56 @@ export default {
 </script>
 
 <template>
-  <h1 class="add-new-post__title">Post editing</h1>
-  <form action="submit">
+  <h1 class="add-new-post__title title is-4">Post editing</h1>
+  <form @submit.prevent="handleSubmit()">
     <div class="add-new-post__form">
+
+      <!-- TITLE -->
       <div class="field">
         <label class="label">Title</label>
         <div class="control has-icons-left has-icons-right custom-input" :class="{ 'is-danger': titleError }">
-
           <span class="icon is-small is-left">
             <i class="fas fa-user"></i>
           </span>
 
-          <!-- права іконка -->
           <span v-if="titleError" class="icon is-small is-right">
             <i class="fas fa-exclamation-triangle"></i>
           </span>
 
           <input class="input" type="text" placeholder="Post Title" v-model="newTitle" @input="titleError = ''" />
         </div>
-
         <span v-if="titleError" class="help is-danger">{{ titleError }}</span>
-
       </div>
 
+      <!-- BODY -->
       <div class="field">
         <label class="label">Write Post Body</label>
         <div class="control has-icons-left has-icons-right custom-input" :class="{ 'is-danger': bodyError }">
-
-          <!-- права іконка -->
           <span v-if="bodyError" class="icon is-small is-right">
             <i class="fas fa-exclamation-triangle"></i>
           </span>
 
           <textarea class="textarea" placeholder="Post Body" v-model="newBody" @input="bodyError = ''"></textarea>
         </div>
-
         <span v-if="bodyError" class="help is-danger">{{ bodyError }}</span>
+      </div>
+
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="field-group is-grouped mt-4">
+      <div class="control">
+        <button type="submit" class="button is-primary post-save-button">
+          Save
+        </button>
+      </div>
+      <div class="control">
+        <button type="button" class="button is-light post-cancel-button" @click="handleCancel()">
+          Cancel
+        </button>
       </div>
     </div>
 
-    <button @click.prevent="handleSubmit()">Save</button>
-    <button @click.prevent="handleCancel()">Cancel</button>
   </form>
 </template>
 
@@ -211,6 +220,13 @@ export default {
 }
 
 /* BUTTONS */
+.field-group {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: row;
+  gap: 0.75rem;
+}
+
 button {
   padding: 0.7rem 1.6rem;
   border-radius: 8px;
@@ -221,23 +237,23 @@ button {
   transition: background-color 0.2s, transform 0.1s;
 }
 
-button:first-of-type {
+.button.is-primary {
   background-color: #485fc7;
+  border-color: transparent;
   color: #fff;
-  margin-right: 0.5rem;
 }
 
-button:first-of-type:hover {
+.button.is-primary:hover {
   background-color: #3e56c4;
 }
 
-button:last-of-type {
-  background-color: #e5e7eb;
-  color: #363636;
+.button.is-light {
+  background-color: #eff1fa;
+  color: #3850b7;
 }
 
-button:last-of-type:hover {
-  background-color: #d1d5db;
+.button.is-light:hover {
+  background-color: #e6e9f7;
 }
 
 button:active {

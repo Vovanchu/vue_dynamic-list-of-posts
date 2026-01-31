@@ -16,10 +16,13 @@ const routes = [
     props: true,
   },
   {
-    path: '/main',
+    path: '/main/:id',
     name: 'main-page',
     component: Main,
     props: true,
+    meta: {
+      requiresAuth: true,
+    },
   },
 ]
 
@@ -29,7 +32,8 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const isAuth = !!localStorage.getItem('userId')
+  const userId = localStorage.getItem('userId')
+  const isAuth = !!userId
 
   if (to.meta.requiresAuth && !isAuth) {
     next('/')
@@ -37,7 +41,7 @@ router.beforeEach((to, from, next) => {
   }
 
   if (isAuth && (to.path === '/' || to.path.startsWith('/register'))) {
-    next('/main')
+    next(`/main/${userId}`)
     return
   }
 

@@ -5,6 +5,7 @@ import PostTable from './PostTable.vue'
 import PostDetail from './PostDetail.vue'
 import AddNewPost from './AddNewPost.vue'
 import EditPost from './EditPost.vue';
+import Loader from './Loader.vue';
 
 export default {
   name: 'PostsComponent',
@@ -14,6 +15,7 @@ export default {
     PostDetail,
     AddNewPost,
     EditPost,
+    Loader,
   },
 
   props: {
@@ -29,8 +31,10 @@ export default {
       selectedPostId: null as number | null,
       addNewPost: false,
       isEditing: false,
+      isLoading: false,
     }
   },
+
 
   mounted() {
     this.fetchPosts()
@@ -61,35 +65,49 @@ export default {
       const userId = localStorage.getItem('userId')
       if (!userId) return
 
+      this.isLoading = true
+
       try {
         this.posts = await PostApi.getAllPostsByUserId(+userId)
       } catch {
         this.errorMessage = 'Failed to load posts'
+      } finally {
+        this.isLoading = false
       }
     },
 
-    handleDeletePost(id: number) {
-      this.selectedPostId = null;
-      PostApi.deletePost(id)
-        .then(() => {
-          this.fetchPosts()
-        })
-        .catch((error) => {
-          this.errorMessage = error.message
-        })
+    async handleDeletePost(id: number) {
+      this.selectedPostId = null
+      this.isLoading = true
+
+      try {
+        await PostApi.deletePost(id)
+        await this.fetchPosts()
+      } catch {
+        this.errorMessage = 'Failed to delete post'
+      } finally {
+        this.isLoading = false
+      }
     },
+
 
     handleAddNewPost() {
       this.selectedPostId = null;
       this.addNewPost = true;
     },
 
-    handlePostCreated(postId: number) {
+    async handlePostCreated(postId: number) {
       this.addNewPost = false
-      this.fetchPosts()
+      this.isLoading = true
 
-      this.selectedPostId = postId
-    }
+      try {
+        await this.fetchPosts()
+        this.selectedPostId = postId
+      } finally {
+        this.isLoading = false
+      }
+    },
+
 
   },
 }
@@ -97,38 +115,44 @@ export default {
 
 <template>
   <div class="posts-layout" :class="{ 'Sidebar--open': isSidebarOpen }">
-    <section class="posts-list">
-      <header class="posts-list__header">
-        <h1 class="posts-list__title">Posts</h1>
-        <button class="button button--primary" :class='{ "posts-list__action": addNewPost }' @click="handleAddNewPost">
+    <!-- LEFT COLUMN -->
+    <section class="posts-list box">
+      <header class="posts-list__header is-flex is-justify-content-space-between is-align-items-center">
+        <h1 class="posts-list__title title is-4">Posts</h1>
+
+        <button class="button is-primary" :class="{ 'is-light': addNewPost }" @click="handleAddNewPost">
           Add New Post
         </button>
       </header>
 
-      <p v-if="posts.length === 0" class="posts-list__empty">
+      <Loader v-if="isLoading" />
+
+      <p v-else-if="posts.length === 0 && isLoading === false" class="has-text-centered has-text-grey">
         No posts yet.
       </p>
 
-      <PostTable v-else :posts="posts" :selectedPostId="selectedPostId" :togglePost="togglePost" />
+      <PostTable v-else-if="!isLoading && posts.length > 0" :posts="posts" :selectedPostId="selectedPostId"
+        :togglePost="togglePost" />
     </section>
 
+    <!-- RIGHT COLUMN -->
     <transition name="slide-fade" mode="out-in">
-      <div v-if="isEditing" key="edit" class="sidebar">
+      <section v-if="isEditing" key="edit" class="sidebar box">
         <EditPost :selectedPost="selectedPost" @close="isEditing = false" @post-updated="fetchPosts" />
-      </div>
+      </section>
 
-      <div v-else-if="selectedPost" key="detail" class="sidebar">
+      <section v-else-if="selectedPost" key="detail" class="sidebar box">
         <PostDetail :selectedPost="selectedPost" @deleted="handleDeletePost" @close="selectedPostId = null"
           @edit="isEditing = true" />
-      </div>
+      </section>
 
-      <div v-else-if="addNewPost" key="add" class="sidebar">
+      <section v-else-if="addNewPost" key="add" class="sidebar box">
         <AddNewPost :addNewPost="addNewPost" @close="addNewPost = false" @post-created="handlePostCreated" />
-      </div>
+      </section>
     </transition>
-
   </div>
 </template>
+
 
 <style scoped>
 .posts-layout {
@@ -202,12 +226,13 @@ export default {
   border: none;
 }
 
-.button--primary {
+.button.is-primary {
   background-color: #485fc7;
+  border-color: transparent;
   color: #fff;
 }
 
-.button--primary:hover {
+.button.is-primary:hover {
   background-color: #3e56c4;
 }
 
