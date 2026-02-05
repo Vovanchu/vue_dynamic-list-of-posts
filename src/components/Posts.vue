@@ -90,7 +90,6 @@ export default {
       }
     },
 
-
     handleAddNewPost() {
       this.selectedPostId = null;
       this.addNewPost = true;
@@ -107,8 +106,6 @@ export default {
         this.isLoading = false
       }
     },
-
-
   },
 }
 </script>
@@ -124,6 +121,12 @@ export default {
           Add New Post
         </button>
       </header>
+
+      <!-- ERROR MESSAGE -->
+      <div v-if="errorMessage" class="notification is-danger is-light">
+        <button class="delete" @click="errorMessage = ''"></button>
+        {{ errorMessage }}
+      </div>
 
       <Loader v-if="isLoading" />
 
@@ -152,130 +155,3 @@ export default {
     </transition>
   </div>
 </template>
-
-
-<style scoped>
-.posts-layout {
-  display: grid;
-  align-items: stretch;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto;
-  gap: 24px;
-  padding: 3rem;
-  transition: grid-template-columns 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.Sidebar--open {
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto;
-}
-
-/* LEFT COLUMN */
-.posts-list {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-
-  padding: 20px;
-  border-radius: 8px;
-  background-color: #fff;
-  box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1),
-    0 0 0 1px rgba(10, 10, 10, 0.05);
-}
-
-.posts-list__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  margin-bottom: 1.5rem;
-}
-
-.posts-list__title {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #363636;
-}
-
-.posts-list__empty {
-  text-align: center;
-  color: #94a3b8;
-}
-
-/* RIGHT COLUMN */
-.sidebar {
-  align-self: stretch;
-  height: auto;
-  display: flex;
-  flex-direction: column;
-
-  padding: 20px;
-  border-radius: 8px;
-  background-color: #fff;
-  box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1),
-    0 0 0 1px rgba(10, 10, 10, 0.05);
-}
-
-
-/* BUTTONS */
-.button {
-  cursor: pointer;
-  padding: 10px 20px;
-  font-size: 16px;
-  border-radius: 6px;
-  border: none;
-}
-
-.button.is-primary {
-  background-color: #485fc7;
-  border-color: transparent;
-  color: #fff;
-}
-
-.button.is-primary:hover {
-  background-color: #3e56c4;
-}
-
-.posts-list__action {
-  background-color: #eee;
-  color: #3850b7;
-}
-
-
-.posts-list__action:hover {
-  background-color: #e6e9f7;
-}
-
-/* TRANSITIONS */
-.slide-fade-enter-active {
-  animation: slideIn 1s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.slide-fade-leave-active {
-  animation: slideOut 1s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes slideIn {
-  0% {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slideOut {
-  0% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-}
-</style>

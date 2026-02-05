@@ -18,8 +18,8 @@ const deleteComment = async (id: number) => {
   return response
 }
 
-const updateComment = async (id: number, usersId: number, title: string, body: string) => {
-  const response = await client.patch(`/comments/${id}`, { usersId, title, body })
+const updateComment = async (id: number, userId: number, title: string, body: string) => {
+  const response = await client.patch(`/comments/${id}`, { userId, title, body })
 
   return response
 }

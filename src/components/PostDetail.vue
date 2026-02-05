@@ -117,6 +117,11 @@ export default {
     <div class="content mb-5 post-detail-content">
       <p>{{ selectedPost.body }}</p>
     </div>
+    <!-- ERROR MESSAGE -->
+    <div v-if="errorMessage" class="notification is-danger is-light">
+      <button class="delete" @click="errorMessage = ''"></button>
+      {{ errorMessage }}
+    </div>
 
     <Loader v-if="isLoading" />
 
@@ -136,89 +141,4 @@ export default {
       Write Comment
     </button>
   </div>
-
 </template>
-
-
-
-<style>
-.post-detail {
-  margin: 0;
-  padding: 0;
-}
-
-.post-detail-main-info {
-  margin-bottom: 1.5rem;
-}
-
-.post-detail-header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.post-detail-title {
-  font-size: 1.75em;
-  margin-bottom: .5714em;
-
-  color: #363636;
-  font-weight: 600;
-  line-height: 1.125;
-}
-
-.post-detail-content {
-  margin-bottom: 1.5rem;
-}
-
-.button-wrapper {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.btn {
-  background-color: #fff;
-  border: none;
-  cursor: pointer;
-
-  font-size: 16px;
-}
-
-.btn.delete-btn {
-  color: #f14668;
-}
-
-.comments-wrapper {
-  margin-bottom: 1.5rem;
-}
-
-.comments-wrapper-title {
-  color: rgb(54, 54, 54);
-  font-size: 2rem;
-  font-weight: 600;
-  line-height: 1.125;
-}
-
-/* ADD COMMENT BUTTON */
-.button--primary {
-  background-color: #485fc7;
-  border-color: transparent;
-  color: #fff;
-  border-radius: 4px;
-
-  cursor: pointer;
-  text-align: center;
-  white-space: nowrap;
-  font-size: 1rem;
-
-  padding: calc(.5em - 1px) 1em;
-}
-
-.button.is-loading {
-  pointer-events: none;
-}
-
-.button--primary:hover {
-  background-color: #3e56c4;
-}
-</style>
